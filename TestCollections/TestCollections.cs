@@ -28,6 +28,18 @@ namespace TestCollections
             Assert.That(collection.ToString(), Is.EqualTo("[5, 16, 271]"));
         }
 
+        //DDT tests
+        [TestCase("", "[]")]
+        [TestCase("5", "[5]")]
+        [TestCase("5, 16, 271", "[5, 16, 271]")]
+
+        public void Test_Collection_ConstructorDDT(string data, string expected)
+        {
+            Collection<int> collection = new Collection<int>(data.Split(", ", StringSplitOptions.RemoveEmptyEntries).Select(int.Parse).ToArray());
+
+            Assert.That(collection.ToString(), Is.EqualTo(expected));
+        }
+
         [Test]
         public void Test_Collection_Add()
         {
@@ -36,6 +48,22 @@ namespace TestCollections
             collection.Add(-7);
 
             Assert.That(collection.ToString(), Is.EqualTo("[5, 16, 271, -7]"));
+        }
+
+        //DDT tests
+        [TestCase("", 88, "[88]")]
+        [TestCase("5, 16, 271", -7, "[5, 16, 271, -7]")]
+        [TestCase("5, 16, 271", 2, "[5, 16, 271, 2]")]
+
+        public void Test_Collection_AddDDT(string data, int addData, string expected)
+        {
+            Collection<int> collection = new Collection<int>(data.Split(", ", StringSplitOptions.RemoveEmptyEntries).Select(int.Parse).ToArray());
+
+            collection.Add(addData);
+
+            string actual = collection.ToString();
+
+            Assert.That(actual, Is.EqualTo(expected));
         }
 
         [Test]
@@ -74,13 +102,41 @@ namespace TestCollections
             Assert.That(collection[0], Is.EqualTo("Ivan"));
         }
 
+        //DDT tests
+        [TestCase("Dimitar", 0, "Dimitar")]
+        [TestCase("Ivan, Stephan, Dimitar", 0, "Ivan")]
+        [TestCase("Ivan, Stephan, Dimitar", 1, "Stephan")]
+        [TestCase("Ivan, Stephan, Dimitar", 2, "Dimitar")]
+
+        public void Test_Collection_GetByIndexDDT(string data, int index, string expected)
+        {
+            Collection<string> collection = new Collection<string>(data.Split(", ", StringSplitOptions.RemoveEmptyEntries));
+
+            string actual = collection[index];
+
+            Assert.That(actual, Is.EqualTo(expected));
+        }
+
         [Test]
         public void Test_Collection_GetByInvalidIndex()
         {
             Collection<string> collection = new Collection<string>("Ivan", "Stephan", "Dimitar");
 
-            Assert.That(() => { string name = collection[10]; }, Throws.InstanceOf<ArgumentOutOfRangeException>());
-            Assert.That(() => { string name = collection[-1]; }, Throws.InstanceOf<ArgumentOutOfRangeException>());
+            Assert.That(() => collection[10], Throws.InstanceOf<ArgumentOutOfRangeException>());
+            Assert.That(() => collection[-1], Throws.InstanceOf<ArgumentOutOfRangeException>());
+        }
+
+        //DDT tests
+        [TestCase("", 0)]
+        [TestCase("Ivan, Stephan, Dimitar", -1)]
+        [TestCase("Ivan, Stephan, Dimitar", 3)]
+        [TestCase("Ivan, Stephan, Dimitar", 150)]
+
+        public void Test_Collection_GetByInvalidIndexDDT(string data, int index)
+        {
+            Collection<string> collection = new Collection<string>(data.Split(", ", StringSplitOptions.RemoveEmptyEntries));
+
+            Assert.That(() => collection[index], Throws.InstanceOf<ArgumentOutOfRangeException>());
         }
 
         [Test]
@@ -118,11 +174,11 @@ namespace TestCollections
         {
             Collection<string> collection = new Collection<string>("Ivan", "Stephan", "Dimitar");
 
-            collection.Add("Peter");
+            int lastIndex = collection.Count; 
 
-            string itemLastIndex = "Peter";
+            collection.InsertAt(lastIndex, "Peter");
 
-            Assert.That(collection[collection.Count - 1], Is.EqualTo(itemLastIndex));
+            Assert.That(collection[collection.Count-1], Is.EqualTo("Peter"));
         }
 
         [Test]
@@ -135,6 +191,24 @@ namespace TestCollections
             collection.InsertAt(middleIndex, "Peter");
 
             Assert.That(collection[middleIndex], Is.EqualTo("Peter"));
+        }
+
+        //DDT tests
+        [TestCase("", 0, "Petar", "[Petar]")]
+        [TestCase("Petar", 0, "Ivan", "[Ivan, Petar]")]
+        [TestCase("Ivan, Stephan, Dimitar", 0, "Petar", "[Petar, Ivan, Stephan, Dimitar]")]
+        [TestCase("Ivan, Stephan, Dimitar", 3, "Petar", "[Ivan, Stephan, Dimitar, Petar]")]
+        [TestCase("Ivan, Stephan, Dimitar", 1, "Petar", "[Ivan, Petar, Stephan, Dimitar]")]
+
+        public void Test_Collection_InsertAtDDT(string data, int index, string insertData, string expected)
+        {
+            Collection<string> collection = new Collection<string>(data.Split(", ", StringSplitOptions.RemoveEmptyEntries));
+
+            collection.InsertAt(index, insertData);
+
+            string actual = collection.ToString();
+
+            Assert.That(actual, Is.EqualTo(expected));
         }
 
         [Test]
@@ -158,6 +232,18 @@ namespace TestCollections
             Collection<string> collection = new Collection<string>("Ivan", "Stephan", "Dimitar");
 
             Assert.That(() => { collection.InsertAt(11, "Peter"); }, Throws.InstanceOf<ArgumentOutOfRangeException>());
+        }
+
+        //DDT tests
+        [TestCase("", 1, "Peter")]
+        [TestCase("Ivan, Stephan, Dimitar", -1, "Peter")]
+        [TestCase("Ivan, Stephan, Dimitar", 11, "Peter")]
+
+        public void Test_Collection_InsertAtInvalidIndexDDT(string data, int index, string insertData)
+        {
+            Collection<string> collection = new Collection<string>(data.Split(", ", StringSplitOptions.RemoveEmptyEntries));
+
+            Assert.That(() => { collection.InsertAt(index, insertData); }, Throws.InstanceOf<ArgumentOutOfRangeException>());
         }
 
         [Test]
@@ -186,13 +272,44 @@ namespace TestCollections
             Assert.That(collection[lastIndex], Is.EqualTo("Ivan"));
         }
 
+        //DDT tests
+        [TestCase("Ivan, Stephan, Dimitar", 1, 2, "[Ivan, Dimitar, Stephan]")]
+        [TestCase("Ivan, Stephan, Dimitar, Yordan", 0, 3, "[Yordan, Stephan, Dimitar, Ivan]")]
+
+        public void Test_Collection_ExchangeDDT(string data, int index1, int index2, string expected)
+        {
+            Collection<string> collection = new Collection<string>(data.Split(", ", StringSplitOptions.RemoveEmptyEntries));
+
+            collection.Exchange(index1, index2);
+
+            string actual = collection.ToString();
+
+            Assert.That(actual, Is.EqualTo(expected));
+        }
+
         [Test]
         public void Test_Collection_ExchangeInvalidIndexes()
         {
             Collection<string> collection = new Collection<string>("Ivan", "Stephan", "Dimitar");
 
-            Assert.That(() => { collection[11] = "Peter"; }, Throws.InstanceOf<ArgumentOutOfRangeException>());
-            Assert.That(() => { collection[-11] = "Peter"; }, Throws.InstanceOf<ArgumentOutOfRangeException>());
+            Assert.That(() => { collection.Exchange(11, 0); }, Throws.InstanceOf<ArgumentOutOfRangeException>());
+
+            Assert.That(() => { collection.Exchange(11, 25); }, Throws.InstanceOf<ArgumentOutOfRangeException>());
+            
+            Assert.That(() => { collection.Exchange(1, -12); }, Throws.InstanceOf<ArgumentOutOfRangeException>());
+        }
+
+        //DDT tests
+        [TestCase("", 11, 0)]
+        [TestCase("Ivan, Stephan, Dimitar", 11, 0)]
+        [TestCase("Ivan, Stephan, Dimitar", 11, 25)]
+        [TestCase("Ivan, Stephan, Dimitar", 1, -12)]
+
+        public void Test_Collection_ExchangeInvalidIndexesDDT(string data, int index1, int index2)
+        {
+            Collection<string> collection = new Collection<string>(data.Split(", ", StringSplitOptions.RemoveEmptyEntries));
+
+            Assert.That(() => { collection.Exchange(index1, index2); }, Throws.InstanceOf<ArgumentOutOfRangeException>());
         }
 
         [Test]
@@ -231,12 +348,42 @@ namespace TestCollections
             Assert.That(collection[middleIndex], Is.EqualTo("Dimitar"));
         }
 
+        //DDT tests
+        [TestCase("Ivan", 0, "[]")]
+        [TestCase("Ivan, Stephan, Dimitar", 0, "[Stephan, Dimitar]")]
+        [TestCase("Ivan, Stephan, Dimitar", 2, "[Ivan, Stephan]")]
+        [TestCase("Ivan, Stephan, Dimitar", 1, "[Ivan, Dimitar]")]
+
+        public void Test_Collection_RemoveAtDDT(string data, int index, string expected)
+        {
+            Collection<string> collection = new Collection<string>(data.Split(", ", StringSplitOptions.RemoveEmptyEntries));
+
+            collection.RemoveAt(index);
+
+            string actual = collection.ToString();
+
+            Assert.That(actual, Is.EqualTo(expected));
+        }
+
         [Test]
         public void Test_Collection_RemoveAtInvalidIndex()
         {
             Collection<string> collection = new Collection<string>("Ivan", "Stephan", "Dimitar");
 
             Assert.That(() => { collection.RemoveAt(11); }, Throws.InstanceOf<ArgumentOutOfRangeException>());
+        }
+
+        //DDT tests
+        [TestCase("", 0)]
+        [TestCase("Ivan, Stephan, Dimitar", -1)]
+        [TestCase("Ivan, Stephan, Dimitar", 3)]
+        [TestCase("Ivan, Stephan, Dimitar", 11)]
+
+        public void Test_Collection_RemoveAtInvalidIndexDDT(string data, int index)
+        {
+            Collection<string> collection = new Collection<string>(data.Split(", ", StringSplitOptions.RemoveEmptyEntries));
+
+            Assert.That(() => { collection.RemoveAt(index); }, Throws.InstanceOf<ArgumentOutOfRangeException>());
         }
 
         [Test]
